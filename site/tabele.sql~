@@ -1,0 +1,41 @@
+
+
+CREATE TABLE Formulare
+  (
+    id_formular   INTEGER NOT NULL primary key,
+    nume          VARCHAR(50) NOT NULL,
+    descriere     VARCHAR(256),
+    domeniu       VARCHAR(20),
+    data_creare   DATE,
+    nr_completari INTEGER
+  );
+
+insert into Formulare values('111','Cheltuielile studentilor','Buna ziua! In cadrul acestei cercetari as dori sa aflu cati bani si in ce scopuri cheltuiesc studentii.','Educatie','17/02/2005', 0);
+
+
+
+CREATE TABLE Campuri
+  (
+    id_field   INTEGER NOT NULL primary key,
+    nume_field VARCHAR(100) NOT NULL,
+    tip_field  INTEGER NOT NULL
+  );
+CREATE TABLE Asociere
+  (
+    id_formular INTEGER NOT NULL,
+    id_field    INTEGER NOT NULL
+  );
+CREATE TABLE Optiuni
+  (
+    id_field  INTEGER NOT NULL,
+    optiune   VARCHAR(50),
+    nr_voturi INTEGER
+  );
+
+SELECT count(nume_field) from Campuri natural join Asociere where id_formular='111';
+
+select formulare.id_formular,formulare.nume,formulare.descriere,campuri.nume_field,campuri.tip_field,optiuni.optiune from (((formulare join asociere ON formulare.id_formular=asociere.id_formular) join campuri on asociere.id_field=campuri.id_field) join Optiuni on campuri.id_field=optiuni.id_field) where formulare.id_formular='111';
+select formulare.id_formular,formulare.nume,formulare.descriere,campuri.nume_field,campuri.tip_field from ((formulare join asociere ON formulare.id_formular=asociere.id_formular) join campuri on asociere.id_field=campuri.id_field) where formulare.id_formular='111';
+select id_field,nume_field,tip_field from Campuri natural join asociere where id_formular='111';
+select optiune from Optiuni natural join Asociere natural join Formulare where id_field='11';
+delete from Optiuni where id_field='11';

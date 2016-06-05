@@ -2,7 +2,8 @@
 <body>
 
 <?php
-	$conn = oci_connect("system","wowmaster252","localhost/orcl");
+//	$conn = oci_connect("system","wowmaster252","localhost/orcl");
+    include 'db.php';
 	if (isset($_GET['q'])):
         $name = ($_GET['q']);
 		$token = strtok($name, "~");

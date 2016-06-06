@@ -12,12 +12,13 @@
 	$id_formular = $_GET['id_formular'];
 	$conn = oci_connect("student", "student", "//localhost/XE");
 	//nume si descriere
-	$query = "select nume,descriere from Formulare where id_formular='$id_formular'";   //numele si descrierea formularului
+	$query = "select nume,descriere,nr_completari from Formulare where id_formular='$id_formular'";   //numele si descrierea formularului
 	$q = oci_parse($conn, $query);
 	$r=oci_execute($q);
 	$head=oci_fetch_array($q);
 	$nume=$head[0];
 	$descriere=$head[1];
+	$nr_completari=$head[2];
 	echo '<h1 class="page-title"><b>Sondaj "'.$nume.'"</b></h1><br> <p class="page-description">'.$descriere.'</p><br><br>';
 
 	//Intrebari
@@ -43,7 +44,7 @@
 		$query = "select optiune,text from ((Formulare natural join Asociere)natural join Optiuni) where id_field='$idfield[$a]'";
 		$q2 = oci_parse($conn, $query);
 		$r = oci_execute($q2);
-		if($tip==2){			//radio button
+		if($tip==1){			//radio button
 			$count2=$count2+1;
 			$a2=$a2+1;
 			$idfield2[$a2]=$questions[0];
@@ -62,7 +63,7 @@
 			$tip2[$count]=$tip;
 			echo '<input type="text" value="" name="fieldtip0'.$count0.'"><br/>';
 		}
-		else if ($tip==3){		//checkbox
+		else if ($tip==2){		//checkbox
 			$count3=$count3+1;
 			$a3=$a3+1;
 			$idfield3[$a3]=$questions[0];
@@ -140,6 +141,18 @@
 		else $nodata=1;
 		if($nodata==1){
 			echo '<p class="page-description">Nu ati raspuns la toate intrebarile.</p>';
+		}
+		else{
+			$nr_completari=$nr_completari+1;
+			$update="update Formulare set nr_completari='".$nr_completari."'where id_formular='".$id_formular."'";
+			$q4=oci_parse($conn, $update);
+			$r4=oci_execute($q4);
+			oci_commit($conn);
+			echo '<script>
+				<!--
+				location.replace("http://localhost/Anonymous/statistic.php?id_formular='.$id_formular.'");
+				-->
+			</script>';
 		}
 	}
 	

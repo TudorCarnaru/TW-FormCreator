@@ -12,27 +12,25 @@
 
         <?php
         include 'db.php';
-
-        if ($_GET['id']) {
-
-            $id = mysqli_real_escape_string($conn, $_GET['id']);
-
-            $query = "SELECT * FROM `Formulare` WHERE id_formular='$id' LIMIT 1";
-            $r = mysqli_query($conn, $query);
-
-            $result = mysqli_fetch_assoc($r);
-
-            if (!$result) {
-                die('Nu am gasit formularul solicitat');
-            }
-
-            $formular = $result;
-
-            $name = $formular['nume'];
-            $id_formular = $formular['id_formular'];
-            $description = $formular['description'];
-            $domain = $formular['domeniu'];
+        if (isset($_GET['id_formular'])) 
+		{
+            $id_formular = $_GET['id_formular'];
+            $query = "select * from Formulare where id_formular='$id_formular'";
+			$q = oci_parse($conn, $query);
+			$r=oci_execute($q);
+			$formular=oci_fetch_array($q);
+            $name = $formular['1'];
+            $id_formular = $formular['0'];
+            $description = $formular['2'];
+            $domain = $formular['3'];
         }
+		else
+		{
+			$name='';
+			$id_formular='0';
+			$description='';
+			$domain='';
+		}
         ?>
         <header>
             <h1 class="page-title">Anonymous Feedback Tool - Add</h1>
@@ -63,7 +61,7 @@
                             <p>Form Key:</p>
                         </td>	
                         <td width="355" height="35" align="left" valign="center">
-                            <INPUT TYPE = "TEXT" VALUE placeholder ="Cheie" NAME ="id_formular">
+                            <INPUT id="id_formular" TYPE = "TEXT" placeholder ="Cheie" NAME ="id_formular" VALUE="<?php echo htmlentities($id_formular); ?>">
                         </td>
                     <tr>
                     <tr>
@@ -71,9 +69,7 @@
                             <p>Form Description:</p>
                         </td>	
                         <td width="355" height="35" align="left" valign="center">
-
-                            <INPUT TYPE = "TEXT" VALUE placeholder ="Descriptie" NAME ="descriere">
-
+                            <INPUT id="form_desc" TYPE = "TEXT"  placeholder ="Descriptie" NAME ="description" VALUE="<?php echo htmlentities($description); ?>">
                         </td>
                     <tr>
                     <tr>
@@ -81,9 +77,7 @@
                             <p>Form Domain:</p>
                         </td>	
                         <td width="355" height="35" align="left" valign="center">
-
-                            <INPUT TYPE = "TEXT" VALUE placeholder ="Domeniu" NAME ="domeniu">
-
+                            <INPUT id="form_dom" TYPE = "TEXT"  placeholder ="Domeniu" NAME ="domain" VALUE="<?php echo htmlentities($domain); ?>">
                         </td>
                     <tr>
 
@@ -120,18 +114,13 @@
         </table>
         <h5>Aici va fi formularul dumneavoastra:</h5>
         <div id="form_create_container">
-            <?php
-            if ($formular['html']) {
-                echo $formular['html'];
-            } else {
-                ?>
                 <!--Nu scrieti nimic aici-->
                 <form action="" method="POST">
-                    <!--Nu scrieti nimic aici-->
+                    <!--Nu scrieti nimic aici--> 
                 </form>
                 <!--Nu scrieti nimic aici-->
-            <?php } ?>
         </div>
+		<p id="Test"> </p>
         <br>
         <input type="submit" name='Adauga' onclick='submitForm()' />
         <br>
@@ -139,7 +128,21 @@
         <?php include 'footer.php'; ?>
 
         <script>
-
+		
+			//Most variables used
+			var TextArray=[];
+			var SingleArray=[];
+			var MultipleArray=[];
+			var i=0;
+			var j=0;
+			var r=0;
+			var textinputcount=0;
+			var nameTextField=document.getElementById('id_formular');
+			
+			
+			
+			
+			//Input type pentru generarea casueti de optiuni
             function inputTypeListener() {
                 var option = document.getElementById('input_type').value;
                 if (option == 1 || option == 2) {
@@ -148,7 +151,10 @@
                     document.getElementById('choice_option').style.display = 'none';
                 }
             }
-
+			
+			
+			
+			//Caseurile pentru generarea + adaugarea campurilor formularului
             document.getElementById("add_input_btn").addEventListener("click", function (e)
             {
                 e.preventDefault();
@@ -163,29 +169,43 @@
                 switch (option) {
                     case '0':
                         //text input
-                        addTextInput(inputLabel);
+						if(textinputcount<5)
+						{
+							textinputcount++;
+							addTextInput(inputLabel);
+							AddText(inputLabel);
+						}
+						else alert('Too many Text fields!');
                         break;
                     case '1':
-                        var optionLabel = document.getElementById('choice_option').value;
-                        addSingleChoice(inputLabel, optionLabel);
+							var optionLabel = document.getElementById('choice_option').value;
+							AddSingle(inputLabel,optionLabel);
+							addSingleChoice(inputLabel, optionLabel);
                         break;
                     case '2':
-                        var optionLabel = document.getElementById('choice_option').value;
-                        addMultipleChoice(inputLabel, optionLabel);
+							var optionLabel = document.getElementById('choice_option').value;
+							AddMultiple(inputLabel,optionLabel);
+							addMultipleChoice(inputLabel, optionLabel);
                         break;
                     default:
                         alert('Invalid option for input type. You provided ' + option);
                 }
             });
-
+			
+			
+			//self explanatory
             function addBreak(container) {
                 container.appendChild(document.createElement("br"));
             }
-
+			//self explanatory
             function addSpace(container) {
                 container.appendChild(document.createTextNode(" "));
             }
-
+			
+			
+			
+			
+			//adaugarea unei casute de text la container
             function addTextInput(inputLabel) {
                 var container = document.getElementById('form_create_container').getElementsByTagName('form')[0];
 
@@ -200,7 +220,10 @@
                 // Append a line break 
 
             }
-
+			
+			
+			
+			//adaugarea unei optiuni la un anumit camp
             function addSingleChoice(inputLabel, optionLabel) {
                 var container = document.getElementById('form_create_container').getElementsByTagName('form')[0];
 
@@ -230,7 +253,10 @@
                 container.appendChild(radioInput);
                 addSpace(container);
             }
-
+			
+			
+			
+			//adaugarea unei optiuni pentru un anumit camp ( varianta cat adaugam la un camp de checbox)
             function addMultipleChoice(inputLabel, optionLabel) {
                 var container = document.getElementById('form_create_container').getElementsByTagName('form')[0];
 
@@ -259,7 +285,10 @@
                 container.appendChild(checkboxInput);
                 addSpace(container);
             }
-
+			
+			
+			
+			//functia de submit ce face requesturi ajax
             function submitForm() {
 
                 if (window.XMLHttpRequest)
@@ -276,7 +305,7 @@
                 {
                     if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
                     {
-                        document.getElementById("1").innerHTML += xmlhttp.responseText;
+                        document.getElementById("form_create_container").innerHTML += xmlhttp.responseText;
                     }
                 };
 
@@ -286,15 +315,34 @@
 
                 xmlhttp.open("POST", url, true);
                 xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-
                 var data = insinfo(formGeneralData);
-
-                data = data + '&userForm=' + encodeURIComponent(document.getElementById('form_create_container').innerHTML);
-
+				console.log(TextArray);
+                data = data + '&TextFields=' + TextArray + '&SingleFields=' + SingleArray + '&MultipleFields=' + MultipleArray;
+			
                 xmlhttp.send(data);
 
             }
-
+			function AddText(str)
+			{
+				TextArray[i]=str;
+				i++;
+			}
+			
+			function AddSingle(str1,str2)
+			{
+				SingleArray[j]=str1;
+				j++;
+				SingleArray[j]=str2;
+				j++;
+			}
+			
+			function AddMultiple(str1,str2)
+			{
+				MultipleArray[r]=str1;
+				r++;
+				MultipleArray[r]=str2;
+				r++;
+			}
 
             function insinfo(sendForm) {
                 var dataArray = [];
@@ -308,78 +356,6 @@
                 return dataArray.join("&");
             }
 
-        </script>
-
-        <script>
-
-            //    var textfield = document.getElementById("Text_Field");
-            //    var nameTextField = document.getElementById("Form_Name");
-            //    var submit = document.getElementById("submit_form6");
-            //    submit.onclick = function ()
-            //    {
-            //        if (window.XMLHttpRequest)
-            //        {
-            //            // code for IE7+, Firefox, Chrome, Opera, Safari
-            //            xmlhttp = new XMLHttpRequest();
-            //        }
-            //        else
-            //        {
-            //            // code for IE6, IE5
-            //            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-            //        }
-            //        xmlhttp.onreadystatechange = function ()
-            //        {
-            //            if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
-            //            {
-            //                document.getElementById("0").innerHTML += xmlhttp.responseText;
-            //            }
-            //        };
-            //        xmlhttp.open("GET", "AddText.php?q=" + textfield.value + "~" + nameTextField.value + ".", true);
-            //        xmlhttp.send();
-            //    };
-            //    var textfieldsingle = document.getElementById("Single_Choice");
-            //    var nameTextField = document.getElementById("Form_Name");
-            //    var submitSingle = document.getElementById("submit_form7");
-            //    submitSingle.onclick = function ()
-            //    {
-            //        if (window.XMLHttpRequest)
-            //        {
-            //            // code for IE7+, Firefox, Chrome, Opera, Safari
-            //            xmlhttp = new XMLHttpRequest();
-            //        }
-            //        else
-            //        {
-            //            // code for IE6, IE5
-            //            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-            //        }
-            //        xmlhttp.onreadystatechange = function ()
-            //        {
-            //            if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
-            //            {
-            //                document.getElementById("1").innerHTML += xmlhttp.responseText;
-            //            }
-            //        };
-            //        xmlhttp.open("GET", "AddSingle.php?q=" + textfieldsingle.value + "~" + nameTextField.value + ".", true);
-            //        xmlhttp.send();
-            //    };
-            //
-            //    function AddSingle()
-            //    {
-            //        var f = document.createElement("Single");
-            //        var i = document.createElement("input");
-            //        var sub = document.createElement("input")
-            //        i.type = "text";
-            //        i.name = "user_name";
-            //        i.id = "user_name1";
-            //        sub.type = "Submit";
-            //        sub.name = "SubmitSingleOption";
-            //        sub.id = "SubmitSingleOption";
-            //
-            //        f.appendChild(i);
-            //        f.appendChild(sub);
-            //        document.getElementsByTagName('table')[3].appendChild(f);
-            //
-            //    }
         </script>
 
     </body>

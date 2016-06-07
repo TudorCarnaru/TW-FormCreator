@@ -4,7 +4,7 @@
  * This code belongs to NIMA Software SRL | nimasoftware.com
  * For details contact contact@nimasoftware.com
  */
-error_reporting(-1);
+error_reporting(0);
 include 'db.php';
 
 
@@ -85,8 +85,8 @@ for($i=0;$i<$arrayLength;$i+=2)
 	$nume_field=$arraySingle[$i];
 	
 	//verificare ID field
-	$query4="select count(nume_field) from Campuri where nume_field=$nume_field and tip_field=$tip_field";
-	$q = oci_parse($conn, $query);
+	$query4="select count(nume_field) from Campuri where nume_field='$nume_field' and tip_field='$tip_field'";
+	$q = oci_parse($conn, $query4);
 	$r=oci_execute($q);
 	$re=oci_fetch_array($q);
 	$valoare=$re[0];
@@ -118,8 +118,8 @@ for($i=0;$i<$arrayLength;$i+=2)
 	$nume_field=$arrayMultiple[$i];
 	
 	//verificare ID field
-	$query4="select count(nume_field) from Campuri where nume_field='$nume_field' and tip_field=$tip_field";
-	$q = oci_parse($conn, $query);
+	$query4="select count(nume_field) from Campuri where nume_field='$nume_field' and tip_field='$tip_field'";
+	$q = oci_parse($conn, $query4);
 	$r=oci_execute($q);
 	$re=oci_fetch_array($q);
 	$valoare=$re[0];

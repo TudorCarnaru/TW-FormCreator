@@ -45,7 +45,6 @@ else
 	$q = oci_parse($conn, $query);
 	$r=oci_execute($q);
 	oci_commit($conn);
-}
 
 
 //setare id-field;
@@ -72,7 +71,6 @@ for($i=0;$i<$textlength;$i+=1)
 	$query1="INSERT INTO Optiuni (id_field, optiune) VALUES ('$id_field','')";
 	$q1 = oci_parse($conn, $query1);
 	$r1=oci_execute($q1);
-	echo $query1;
 	oci_commit($conn);
 	$id_field+=1;
 }
@@ -85,6 +83,16 @@ for($i=0;$i<$arrayLength;$i+=2)
 {
 	$nume_optiune=$arraySingle[$i+1];
 	$nume_field=$arraySingle[$i];
+	
+	//verificare ID field
+	$query4="select count(nume_field) from Campuri where nume_field=$nume_field and tip_field=$tip_field";
+	$q = oci_parse($conn, $query);
+	$r=oci_execute($q);
+	$re=oci_fetch_array($q);
+	$valoare=$re[0];
+	if($valoare<1) $id_field+=1;
+	
+	//continuare
 	$query2="INSERT INTO Campuri VALUES('$id_field','$nume_field','$tip_field')";
 	$q = oci_parse($conn, $query2);
 	$r=oci_execute($q);
@@ -97,7 +105,6 @@ for($i=0;$i<$arrayLength;$i+=2)
 	$q = oci_parse($conn, $query);
 	$r=oci_execute($q);
 	oci_commit($conn);
-	$id_field+=1;
 }
 
 
@@ -109,6 +116,16 @@ for($i=0;$i<$arrayLength;$i+=2)
 {
 	$nume_optiune=$arrayMultiple[$i+1];
 	$nume_field=$arrayMultiple[$i];
+	
+	//verificare ID field
+	$query4="select count(nume_field) from Campuri where nume_field='$nume_field' and tip_field=$tip_field";
+	$q = oci_parse($conn, $query);
+	$r=oci_execute($q);
+	$re=oci_fetch_array($q);
+	$valoare=$re[0];
+	if($valoare<1) $id_field+=1;
+	
+	//continuare
 	$query2="INSERT INTO Campuri VALUES('$id_field','$nume_field','$tip_field')";
 	$q = oci_parse($conn, $query2);
 	$r=oci_execute($q);
@@ -123,6 +140,6 @@ for($i=0;$i<$arrayLength;$i+=2)
 	oci_commit($conn);
 	$id_field+=1;
 }
-
+}
 
 

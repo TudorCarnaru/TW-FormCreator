@@ -1,57 +1,38 @@
-<html>
-<head>
-    <title>Search forms</title>
-    <meta charset="utf-8"/>
-    <link href='https://fonts.googleapis.com/css?family=Lato:400,300,100,700,900' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="mains.css">
-    
-    <script>
-function popitup()
-{
-	var person= prompt("Please insert the key","Key");
-	if(person!=null)
+	<?php
+	include 'db.php';
+	$name = array_key_exists('numeForm',$_GET)? $_GET['numeForm']:"random1";
+	$query = "select count(nume) from Formulare where nume='$name'";
+	$q = oci_parse($conn, $query);
+	$r=oci_execute($q);
+	$re=oci_fetch_array($q);
+	$valoare=$re[0];
+	if($valoare>0)
 	{
-		window.location="create.php";
+		echo "<table>
+		<tr>
+		<th>Nume Formular</th>
+		<th>Descriere</th>
+		<th>Domeniu</th>
+		</tr>";
+		$query="select id_formular,nume,descriere,domeniu from Formulare where nume='$name'";
+		$q = oci_parse($conn, $query);
+		$r=oci_execute($q);
+		while($row = oci_fetch_array($q)) {
+			$id_formular=$row[0];
+			$link='fill.php?id_formular='.$id_formular;
+			echo "<tr>";
+			echo "<td>" . $row[1] . "</td>";
+			echo "<td>" . $row[2] . "</td>";
+			echo "<td>" . $row[3] . "</td>";
+			echo "<button onclick='window.location.href=".'"'.$link. '"'."'>Fill</button>";
+			echo "<a class='btn' value=$id_formular href=statistics.php?=$id_formular> Statistics </a>";
+			echo "</tr>";
+		}
+		echo "</table>";
 	}
-}
-function goTo()
-{
-	window.location="popup.php";
-}
-function goToStatistics()
-{
-	window.location="statistics.php";
-}
-</script>
-</head>
+	else
+	{
+		echo 'Nu avem Formularul Dvs';
+	}
 
-<body>
-    <header>
-      <h1 class="page-title">Anonymous Feedback Tool - Search</h1>
-	<nav>
-      <ul>
-        <li><a href="home.php"><b>Home</b></a></li>
-        <li><a href="create.php">Create new form</a></li>
-        <li><a href="search.php">Search</a></li>
-	</ul>
-      <div class="contact-btn"><a href="contact.php">Contact</a>
-      </div>
-	</nav>
-    </header>
-	<form>
- 		Search for a form:<b></b><br><input type="text" placeholder="Form name goes here" name="form name"></br>
-	</form>
-    <section class="container">
-        Form1<li><button onclick=goTo()>Fill</button> /<button onclick="popitup()">Edit</button>/ <button onclick=goToStatistics()>Statistics</button><br></br>
-        Form2<li><button onclick=goTo()>Fill</button> /<button onclick="popitup()">Edit</button>/ <button onclick=goToStatistics()>Statistics</button> <br></br>
-        Form3<li><button onclick=goTo()>Fill</button> /<button onclick="popitup()">Edit</button>/ <button onclick=goToStatistics()>Statistics</button><br></br>
-      </section>
-
-
-</li>
-</nav>
-
- <?php include 'footer.php'; ?>
-
-  </body>
-</html>
+	?>
